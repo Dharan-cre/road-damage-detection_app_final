@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Road Damage Detection</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+}
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 30px;
+    background: rgba(0,0,0,0.6);
+}
+
+.logout {
+    background: red;
+    padding: 8px 15px;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+}
+
+
+.container {
+    text-align: center;
+    padding: 30px;
+}
+
+
+.upload-box {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    margin: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background: #00c6ff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+.preview img {
+    width: 320px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+
+.results {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.card {
+    width: 300px;
+    background: rgba(0,0,0,0.7);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.card h3 {
+    border-bottom: 1px solid gray;
+    padding-bottom: 10px;
+}
+
+
+.badge {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.good { color: #00ffae; }
+.bad { color: #ff4d4d; }
+
+
+.recommendation {
+    margin-top: 30px;
+    font-size: 18px;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Road Damage Detection System</h2>
+    <a href="/logout" class="logout">Logout</a>
+</div>
+
+<div class="container">
+
+    <!-- Upload -->
+    <div class="upload-box">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <br>
+            <button type="submit"> Analyze Image</button>
+        </form>
+    </div>
+   
+    <div style="display:flex; justify-content:center; gap:40px; margin-top:30px; flex-wrap:wrap;">
+
+        {% if image_path %}
+        <div style="text-align:center;">
+            <h3 style="color:#fff;"> Original Image</h3>
+            <img src="{{ image_path }}" 
+                style="width:350px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+        </div>
+        {% endif %}
+
+        {% if yolo_image_path %}
+        <div style="text-align:center;">
+            <h3 style="color:#fff;"> YOLO Detection</h3>
+            <img src="{{ yolo_image_path }}?t={{ yolo_image_path }}" 
+                style="width:350px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+        </div>
+        {% endif %}
+
+    </div>
+
+  
+    <div class="results">
+
+        <div class="card">
+            <h3>CNN Model</h3>
+            {% if cnn_result %}
+                <div class="badge">{{ cnn_result }}</div>
+                <p>Confidence: {{ confidence }}%</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>YOLO Model</h3>
+            {% if yolo_result %}
+                <div class="badge">{{ yolo_result }}</div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Recommendation -->
+    {% if recommendation %}
+    <div class="recommendation">
+        {{ recommendation }}
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
