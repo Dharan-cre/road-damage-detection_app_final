@@ -15,7 +15,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # CNN Model
 cnn_model = load_model("final_model.keras")
 
-# ✅ LOAD 3 YOLO MODELS
+# LOAD 3 YOLO MODELS
 crack_model = YOLO("models/crack_best.pt")
 flood_model = YOLO("models/flood_best.pt")
 pothole_model = YOLO("models/pothole_best.pt")
@@ -49,7 +49,6 @@ def dashboard():
     if request.method == "POST":
         file = request.files["image"]
         if file:
-
             filepath = os.path.join(UPLOAD_FOLDER, file.filename)
             file.save(filepath)
             image_path = filepath
@@ -66,32 +65,23 @@ def dashboard():
 
             # ================= YOLO MULTI-MODEL =================
             img_cv = cv2.imread(filepath)
-
             all_detections = []
 
             def run_model(model, label_name, color, conf_thres=0.3):
                 results = model(filepath)
-
                 for r in results:
-
-
                     if r.boxes is not None and len(r.boxes) > 0:
                         for box in r.boxes:
                             x1, y1, x2, y2 = map(int, box.xyxy[0])
                             conf = float(box.conf[0])
-
                             if conf > conf_thres:
                                 all_detections.append((x1, y1, x2, y2, label_name, conf, color))
-
-            
                     elif r.masks is not None:
                         for seg in r.masks.xy:
                             x_coords = seg[:, 0]
                             y_coords = seg[:, 1]
-
                             x1, y1 = int(min(x_coords)), int(min(y_coords))
                             x2, y2 = int(max(x_coords)), int(max(y_coords))
-
                             all_detections.append((x1, y1, x2, y2, label_name, 0.5, color))
 
             run_model(crack_model, "Crack", (0, 255, 0), 0.2)
@@ -100,13 +90,11 @@ def dashboard():
 
             # ================= DRAW BOXES =================
             detected_labels = []
-
             for (x1, y1, x2, y2, label, conf, color) in all_detections:
                 cv2.rectangle(img_cv, (x1, y1), (x2, y2), color, 2)
                 text = f"{label} {conf:.2f}"
                 cv2.putText(img_cv, text, (x1, y1 - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-
                 detected_labels.append(label)
 
             if detected_labels:
@@ -145,4 +133,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host="0.0.0.0", port=7860)
